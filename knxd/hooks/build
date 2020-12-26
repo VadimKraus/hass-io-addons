@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#KNXD_VERSION=$(cat build.json| jq -r '.args.KNXD_VERSION')
+
+
+source ./hooks/_setup.sh
+
+function build {
+    BUILD_ARCH=$1
+    BUILD_FROM=$(get_base_image $BUILD_ARCH)
+    IMAGE_TAG=$(image_tag $BUILD_ARCH)
+    
+    BUILD_CMD="docker build \
+    --build-arg BUILD_FROM=${BUILD_FROM} \
+    --build-arg BUILD_ARCH=${BUILD_ARCH} \
+    --build-arg KNXD_VERSION=${KNXD_VERSION} \
+    -f Dockerfile \
+    -t ${IMAGE_TAG} \
+    ."
+    
+    echo $BUILD_CMD
+    echo $BUILD_CMD | bash
+
+}
+
+function build_all {
+    get_arch | while read BUILD_ARCH
+    do
+        build $BUILD_ARCH
+    done
+}
+
+
+function build_current {
+    BUILD_ARCH=$(get_arch_by_repo)
+    build $BUILD_ARCH
+}
+
+
+build_current
+
+
+
